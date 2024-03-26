@@ -21,13 +21,12 @@ exports.addDevice = async (req, res) => {
 
 exports.updateDevice = async (req, res) => {
   const { id } = req.params;
-  const { deviceName, os, macAddress } = req.body; // Extract fields that can be updated
+  const updates = req.body; // Assume all body properties are valid updates
 
   try {
-      const device = await Device.findByPk(id);
-      if (device) {
-          await device.update({ deviceName, os, macAddress }); // Update the device with new details
-          res.json(device); // Send back the updated device information
+      const updatedDevice = await deviceService.updateDevice(id, updates);
+      if (updatedDevice) {
+          res.json(updatedDevice); // Send back the updated device information
       } else {
           res.status(404).send('Device not found');
       }
