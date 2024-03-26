@@ -1,31 +1,26 @@
 const nmap = require('node-nmap');
-nmap.nmapLocation = "C:\\Program Files (x86)\\Nmap\\nmap.exe";
+nmap.nmapLocation = "C:\\Program Files (x86)\\Nmap\\nmap.exe"; // Adjust as necessary
 
 exports.scanNetworkDevices = () => {
   return new Promise((resolve, reject) => {
-    // Using -O for OS detection, and -sV to determine service/version info
-    // This might require sudo privileges on some systems
-    let osAndVersionScan = new nmap.OsAndPortScan('192.168.1.0/24');
+    let quickScan = new nmap.QuickScan('192.168.1.1/24');
 
-    osAndVersionScan.on('complete', (data) => {
-      const devices = data.map(device => {
-        // Attempt to refine device name if the hostname is 'Unknown Device'
-        const deviceName = device.hostname === 'Unknown Device' && device.vendor ? `${device.vendor} Device` : device.hostname;
-        return {
-          ipAddress: device.ip,
-          deviceName: deviceName || 'Unknown Device',
-          os: device.osNmap ? device.osNmap : 'Unknown',
-          macAddress: device.mac || 'N/A' // Assuming that 'mac' will be present; adjust as needed
-        };
-      });
+    quickScan.on('complete', (data) => {
+      const devices = data.map(device => ({
+        ipAddress: device.ip,
+        deviceName: device.hostname || 'Unknown Device',
+        os: device.osNmap || 'Unknown', // Assuming osNmap holds the OS info
+        macAddress: device.mac || 'N/A', // Adjust based on actual data
+        lastSeen: new Date() // Capture the last seen timestamp
+      }));
       resolve(devices);
     });
 
-    osAndVersionScan.on('error', (error) => {
+    quickScan.on('error', (error) => {
       console.error('Nmap scan failed:', error);
       reject(error);
     });
 
-    osAndVersionScan.startScan();
+    quickScan.startScan();
   });
 };

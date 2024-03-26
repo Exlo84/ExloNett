@@ -38,6 +38,11 @@ const Device = sequelize.define('Device', {
   notificationsEnabled: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
+  },
+  lastSeen: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
   }
 });
 

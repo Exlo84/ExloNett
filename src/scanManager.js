@@ -11,7 +11,7 @@ exports.startNmapScan = () => {
   console.log('Starting Nmap scan...');
   // Set the full path to your Nmap executable if not in the system PATH
   const nmapPath = '"C:\\Program Files (x86)\\Nmap\\nmap.exe"';
-  const command = `${nmapPath} -oX output.xml 192.168.1.0/24`;
+  const command = `${nmapPath} -oX output.xml 192.168.1.1/24`;
 
   nmapProcess = exec(command, (error) => {
     if (error) {
