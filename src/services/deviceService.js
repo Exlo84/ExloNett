@@ -8,15 +8,24 @@ exports.getAllDevices = async () => {
 };
 
 exports.addDevice = async (device) => {
-  // Ensure there is a default value for the os field
-  const deviceWithDefaultOS = {
-    ...device,
-    os: device.os || 'Unknown' // Set 'Unknown' if os field is not provided
-  };
+  // Check if the device already exists in the database
+  const existingDevice = await Device.findOne({ where: { ipAddress: device.ipAddress } });
 
-  const newDevice = await Device.create(deviceWithDefaultOS);
-  discordService.sendNotification(`New device detected: ${device.deviceName}`);
-  return newDevice;
+  if (!existingDevice) {
+    // Ensure there is a default value for the os field
+    const deviceWithDefaultOS = {
+      ...device,
+      os: device.os || 'Unknown' // Set 'Unknown' if os field is not provided
+    };
+
+    const newDevice = await Device.create(deviceWithDefaultOS);
+    discordService.sendNotification(`New device detected: ${device.deviceName}`);
+    return newDevice;
+  } else {
+    console.log(`Device with IP ${device.ipAddress} already exists.`);
+    // No notification for existing devices
+    return existingDevice;
+  }
 };
 
 exports.updateDevice = async (id, updates) => {
@@ -41,12 +50,7 @@ exports.startNetworkScanning = async () => {
     try {
       const devices = await networkUtils.scanNetworkDevices();
       for (const device of devices) {
-        const existingDevice = await Device.findOne({ where: { ipAddress: device.ipAddress } });
-        if (!existingDevice) {
-          await exports.addDevice(device);
-        } else {
-          discordService.sendNotification(`Known device found: ${device.deviceName}`);
-        }
+        await exports.addDevice(device);
       }
     } catch (err) {
       console.error('Error scanning network:', err);

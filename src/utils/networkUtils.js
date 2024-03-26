@@ -1,5 +1,5 @@
 const nmap = require('node-nmap');
-nmap.nmapLocation = "nmap";
+nmap.nmapLocation = "C:\\Program Files (x86)\\Nmap\\nmap.exe";
 
 exports.scanNetworkDevices = () => {
   return new Promise((resolve, reject) => {
