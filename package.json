@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+    "start": "node src/index.js",
+    "stop": "echo 'No direct npm stop command implemented. Use Ctrl+C to stop the application gracefully.'"
+  },   
   "author": "",
   "license": "ISC",
   "dependencies": {

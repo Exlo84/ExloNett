@@ -4,3 +4,4 @@ node_modules/
 database.sqlite
 package-lock.json
 src/config/config.js
+output.xml
