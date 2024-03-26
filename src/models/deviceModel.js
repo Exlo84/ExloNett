@@ -1,5 +1,14 @@
 const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = new Sequelize('sqlite::memory:');
+const path = require('path');
+
+// Define the path for the SQLite database within the "db" folder
+const dbPath = path.join(__dirname, '..', 'db', 'database.sqlite');
+
+// Initialize Sequelize with the updated storage path
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: dbPath // Use the dbPath variable for the storage location
+});
 
 const Device = sequelize.define('Device', {
   id: {
@@ -13,15 +22,18 @@ const Device = sequelize.define('Device', {
   },
   deviceName: {
     type: DataTypes.STRING,
-    allowNull: false
+    // Updated to allow null values to handle cases where the device name isn't immediately known
+    allowNull: true 
   },
   os: {
     type: DataTypes.STRING,
-    allowNull: true // Allow null as OS might not always be detected
+    // Allowing null to accommodate devices where the OS is unknown
+    allowNull: true
   },
   macAddress: {
     type: DataTypes.STRING,
-    allowNull: true // Allow null as MAC address might not always be detected
+    // Allowing null for cases where the MAC address cannot be retrieved
+    allowNull: true
   },
   notificationsEnabled: {
     type: DataTypes.BOOLEAN,

@@ -26,7 +26,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/devices', deviceRoutes);
 
 // Sync database
-sequelize.sync().then(() => {
+sequelize.sync({ alter: true }).then(() => {
   console.log('Database synced successfully');
   // Start network scanning after database sync
   deviceService.startNetworkScanning();

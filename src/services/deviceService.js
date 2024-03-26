@@ -1,4 +1,3 @@
-// src/services/deviceService.js
 const { Device } = require('../models/deviceModel');
 const discordService = require('./discordService');
 const networkUtils = require('../utils/networkUtils');
@@ -8,22 +7,21 @@ exports.getAllDevices = async () => {
 };
 
 exports.addDevice = async (device) => {
-  // Check if the device already exists in the database
   const existingDevice = await Device.findOne({ where: { ipAddress: device.ipAddress } });
 
   if (!existingDevice) {
-    // Ensure there is a default value for the os field
-    const deviceWithDefaultOS = {
+    const deviceWithDefaults = {
       ...device,
-      os: device.os || 'Unknown' // Set 'Unknown' if os field is not provided
+      os: device.os || 'Unknown', // Set 'Unknown' if OS field is not provided
+      macAddress: device.macAddress || 'N/A' // Set 'N/A' if MAC address is not provided
     };
 
-    const newDevice = await Device.create(deviceWithDefaultOS);
+    const newDevice = await Device.create(deviceWithDefaults);
     discordService.sendNotification(`New device detected: ${device.deviceName}`);
     return newDevice;
   } else {
+    // Existing device found, so no need to add again or send notification
     console.log(`Device with IP ${device.ipAddress} already exists.`);
-    // No notification for existing devices
     return existingDevice;
   }
 };
@@ -33,7 +31,17 @@ exports.updateDevice = async (id, updates) => {
   if (!device) {
     throw new Error('Device not found');
   }
-  return await device.update(updates);
+  await device.update(updates);
+  return device;
+};
+
+exports.toggleNotifications = async (id, notificationsEnabled) => {
+  const device = await Device.findByPk(id);
+  if (!device) {
+    throw new Error('Device not found');
+  }
+  await device.update({ notificationsEnabled });
+  return device;
 };
 
 exports.deleteDevice = async (id) => {
@@ -41,7 +49,7 @@ exports.deleteDevice = async (id) => {
   if (!device) {
     throw new Error('Device not found');
   }
-  return await device.destroy();
+  await device.destroy();
 };
 
 exports.startNetworkScanning = async () => {
@@ -49,9 +57,9 @@ exports.startNetworkScanning = async () => {
   setInterval(async () => {
     try {
       const devices = await networkUtils.scanNetworkDevices();
-      for (const device of devices) {
+      devices.forEach(async (device) => {
         await exports.addDevice(device);
-      }
+      });
     } catch (err) {
       console.error('Error scanning network:', err);
     }
