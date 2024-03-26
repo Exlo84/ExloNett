@@ -20,11 +20,20 @@ exports.addDevice = async (req, res) => {
 };
 
 exports.updateDevice = async (req, res) => {
+  const { id } = req.params;
+  const { deviceName, os, macAddress } = req.body; // Extract fields that can be updated
+
   try {
-    const device = await deviceService.updateDevice(req.params.id, req.body);
-    res.json(device);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+      const device = await Device.findByPk(id);
+      if (device) {
+          await device.update({ deviceName, os, macAddress }); // Update the device with new details
+          res.json(device); // Send back the updated device information
+      } else {
+          res.status(404).send('Device not found');
+      }
+  } catch (error) {
+      console.error('Error updating device:', error);
+      res.status(500).send('Error updating device');
   }
 };
 
