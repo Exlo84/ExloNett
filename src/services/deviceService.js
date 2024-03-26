@@ -8,7 +8,13 @@ exports.getAllDevices = async () => {
 };
 
 exports.addDevice = async (device) => {
-  const newDevice = await Device.create(device);
+  // Ensure there is a default value for the os field
+  const deviceWithDefaultOS = {
+    ...device,
+    os: device.os || 'Unknown' // Set 'Unknown' if os field is not provided
+  };
+
+  const newDevice = await Device.create(deviceWithDefaultOS);
   discordService.sendNotification(`New device detected: ${device.deviceName}`);
   return newDevice;
 };
@@ -30,20 +36,20 @@ exports.deleteDevice = async (id) => {
 };
 
 exports.startNetworkScanning = async () => {
-    console.log('Starting network scanning...');
-    setInterval(async () => {
-      try {
-        const devices = await networkUtils.scanNetworkDevices();
-        for (const device of devices) {
-          const existingDevice = await Device.findOne({ where: { ipAddress: device.ipAddress } });
-          if (!existingDevice) {
-            await this.addDevice(device);
-          } else {
-            discordService.sendNotification(`Known device found: ${device.deviceName}`);
-          }
+  console.log('Starting network scanning...');
+  setInterval(async () => {
+    try {
+      const devices = await networkUtils.scanNetworkDevices();
+      for (const device of devices) {
+        const existingDevice = await Device.findOne({ where: { ipAddress: device.ipAddress } });
+        if (!existingDevice) {
+          await exports.addDevice(device);
+        } else {
+          discordService.sendNotification(`Known device found: ${device.deviceName}`);
         }
-      } catch (err) {
-        console.error('Error scanning network:', err);
       }
-    }, 60000); // Scan every 60 seconds (1 minute)
-  };
+    } catch (err) {
+      console.error('Error scanning network:', err);
+    }
+  }, 60000); // Scan every 60 seconds (1 minute)
+};

@@ -1,10 +1,5 @@
-// src/models/deviceModel.js
 const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: 'database.sqlite',
-  logging: false // Disable logging for better performance
-});
+const sequelize = new Sequelize('sqlite::memory:');
 
 const Device = sequelize.define('Device', {
   id: {
@@ -22,7 +17,11 @@ const Device = sequelize.define('Device', {
   },
   os: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true // Allow null as OS might not always be detected
+  },
+  macAddress: {
+    type: DataTypes.STRING,
+    allowNull: true // Allow null as MAC address might not always be detected
   },
   notificationsEnabled: {
     type: DataTypes.BOOLEAN,

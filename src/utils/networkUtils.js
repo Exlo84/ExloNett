@@ -1,31 +1,27 @@
-// utils/networkUtils.js
 const nmap = require('node-nmap');
+nmap.nmapLocation = "nmap";
 
-exports.scanNetworkDevices = async () => {
+exports.scanNetworkDevices = () => {
+  return new Promise((resolve, reject) => {
+    let quickScan = new nmap.QuickScan('192.168.1.0/24');
 
-  try {
-    const scanResult = await nmap.run({
-        range: '192.168.1.1/24',
-        ports: '80,443',
+    quickScan.on('complete', (data) => {
+      const devices = data.map((device) => {
+        return {
+          ipAddress: device.ip,
+          deviceName: device.hostname || 'Unknown Device',
+          os: 'Unknown', // Placeholder, as nmap's OS detection might require more advanced scanning
+          macAddress: device.mac || 'Unknown' // Adjust based on actual data structure
+        };
+      });
+      resolve(devices);
     });
 
-    const devices = [];
+    quickScan.on('error', (error) => {
+      console.error('Nmap scan failed:', error);
+      reject(error);
+    });
 
-    for (const host of scanResult) {
-      const address = host.ip;
-      if (host.hostname) {
-        devices.push({
-          ipAddress: address,
-          deviceName: `${host.hostname[0]} Device`,
-          openPorts: host.openPorts,
-        });
-      }
-    }
-
-    return devices;
-
-  } catch (err) {
-    console.error('Nmap scan failed:', err);
-    return [];
-  }
+    quickScan.startScan();
+  });
 };

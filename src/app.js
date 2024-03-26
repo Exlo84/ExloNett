@@ -1,3 +1,4 @@
+// app.js
 const express = require('express');
 const path = require('path');
 const socketio = require('socket.io');
@@ -6,6 +7,9 @@ const { sequelize } = require('./models/deviceModel');
 const deviceService = require('./services/deviceService');
 
 const app = express();
+
+const indexRoutes = require('./routes/index');
+app.use('/', indexRoutes);
 
 // Middleware
 app.use(express.json());
