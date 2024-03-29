@@ -9,6 +9,9 @@ router.get('/', deviceController.getAllDevices);
 // Add a new device
 router.post('/', deviceController.addDevice);
 
+// Toggle Enable/Disable
+router.post('/toggle-notification/:id', deviceController.toggleNotification);
+
 // Update a specific device by ID
 router.put('/:id', deviceController.updateDevice);
 

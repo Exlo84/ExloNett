@@ -23,21 +23,21 @@ const Device = sequelize.define('Device', {
   deviceName: {
     type: DataTypes.STRING,
     // Updated to allow null values to handle cases where the device name isn't immediately known
-    allowNull: true 
+    allowNull: false 
   },
   os: {
     type: DataTypes.STRING,
     // Allowing null to accommodate devices where the OS is unknown
-    allowNull: true
+    allowNull: false
   },
   macAddress: {
     type: DataTypes.STRING,
     // Allowing null for cases where the MAC address cannot be retrieved
-    allowNull: true
+    allowNull: false
   },
   notificationsEnabled: {
     type: DataTypes.BOOLEAN,
-    defaultValue: true
+    defaultValue: false
   },
   lastSeen: {
     type: DataTypes.DATE,

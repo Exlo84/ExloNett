@@ -1,6 +1,21 @@
 // src/controllers/deviceController.js
 const deviceService = require('../services/deviceService');
 
+exports.toggleNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // This function should toggle the notification status and return the updated device
+    const device = await deviceService.toggleNotifications(id);
+    if (!device) {
+      return res.status(404).json({ error: 'Device not found' });
+    }
+    return res.json(device);
+  } catch (error) {
+    console.error('Error toggling notification:', error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 exports.getAllDevices = async (req, res) => {
   try {
     const devices = await deviceService.getAllDevices();
