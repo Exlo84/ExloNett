@@ -1,7 +1,9 @@
 const http = require('http');
 const app = require('./app');
 const socketio = require('socket.io');
-const deviceService = require('./services/deviceService');
+const { startNmapScan, updateDeviceOsInfo } = require('./scanManager');
+
+startNmapScan();
 
 const server = http.createServer(app);
 const io = socketio(server);

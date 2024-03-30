@@ -12,6 +12,10 @@ const indexRoutes = require('./routes/index');
 app.use('/', indexRoutes);
 
 // Middleware
+app.use((req, res, next) => {
+  console.log('Incoming Request:', req.method, req.path);
+  next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

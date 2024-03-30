@@ -35,13 +35,16 @@ exports.updateDevice = async (id, updates) => {
   return device;
 };
 
-exports.toggleNotifications = async (id, notificationsEnabled) => {
+exports.toggleNotifications = async (id) => {
+  console.log(`Service: Toggling notifications for device ID: ${id}`);
   const device = await Device.findByPk(id);
-  if (!device) {
+  if (device) {
+    const currentStatus = device.notificationsEnabled;
+    await device.update({ notificationsEnabled: !currentStatus });
+    return device.reload();
+  } else {
     throw new Error('Device not found');
   }
-  await device.update({ notificationsEnabled });
-  return device;
 };
 
 exports.deleteDevice = async (id) => {

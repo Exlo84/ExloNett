@@ -1,7 +1,13 @@
-// src/routes/deviceRoutes.js
 const express = require('express');
-const deviceController = require('../controllers/deviceController');
 const router = express.Router();
+const deviceController = require('../controllers/deviceController'); // Make sure this path is correct
+const { updateDeviceOsInfo } = require('../scanManager'); // Adjust path as necessary, if used
+
+// Trigger OS information update
+router.post('/update-devices-os', (req, res) => {
+    updateDeviceOsInfo();
+    res.send("Update process started. Check console for progress.");
+});
 
 // Get all devices
 router.get('/', deviceController.getAllDevices);

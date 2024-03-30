@@ -61,43 +61,65 @@
         }
 
         function addDeviceRow(device) {
-            const statusColor = getStatusColor(device.lastSeen);
-            const row = `
-                <tr id="device-${device.id}">
-                    <td><span class="status-indicator" style="background-color: ${statusColor};"></span>${device.ipAddress}<br>${device.macAddress || 'N/A'}</td>
-                    <td>${device.deviceName}</td>
-                    <td>${device.os}</td>
-                    <td>
-                        <button class="btn ${device.notificationsEnabled ? 'btn-success' : 'btn-danger'} btn-sm" onclick="toggleNotification('${device.id}')">${device.notificationsEnabled ? 'Enabled' : 'Disabled'}</button>
-                    </td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick="editDevice('${device.id}')">Edit</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteDevice('${device.id}')">Delete</button>
-                    </td>
-                </tr>
-            `;
-            document.getElementById('deviceTable').insertAdjacentHTML('beforeend', row);
-        }
+    const statusColor = getStatusColor(device.lastSeen);
+    const row = `
+        <tr id="device-${device.id}">
+            <td><span class="status-indicator" style="background-color: ${statusColor};"></span>${device.ipAddress}<br>${device.macAddress || 'N/A'}</td>
+            <td>${device.deviceName}</td>
+            <td>${device.os || 'Unknown'}</td> <!-- Ensure this correctly displays the OS information -->
+            <td>
+                <button class="btn ${device.notificationsEnabled ? 'btn-success' : 'btn-danger'} btn-sm" onclick="toggleNotification('${device.id}')">${device.notificationsEnabled ? 'Enabled' : 'Disabled'}</button>
+            </td>
+            <td>
+                <button class="btn btn-primary btn-sm" onclick="editDevice('${device.id}')">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteDevice('${device.id}')">Delete</button>
+            </td>
+        </tr>
+    `;
+    document.getElementById('deviceTable').insertAdjacentHTML('beforeend', row);
+}
 
-        function updateDeviceRow(device) {
-            const row = document.querySelector(`#device-${device.id}`);
-            if (row) {
-                row.querySelector('td:nth-child(1)').innerHTML = `<span class="status-indicator" style="background-color: ${getStatusColor(device.lastSeen)};"></span>${device.ipAddress}<br>${device.macAddress || 'N/A'}`;
-                row.querySelector('td:nth-child(2)').textContent = device.deviceName;
-                row.querySelector('td:nth-child(3)').textContent = device.os;
-                const notificationButton = row.querySelector('td:nth-child(4) button');
-                notificationButton.textContent = device.notificationsEnabled ? 'Enabled' : 'Disabled';
-                notificationButton.classList.toggle('btn-success', device.notificationsEnabled);
-                notificationButton.classList.toggle('btn-danger', !device.notificationsEnabled);
+        socket.on('deviceUpdated', (device, row) => {
+    updateDeviceRow(device, row);
+});
+
+function updateDeviceRow(device) {
+    console.log(`Updating device row for device ID: ${device.id}`);
+    const row = document.getElementById(`device-${device.id}`);
+    if (row) {
+        row.querySelector('td:nth-child(1)').innerHTML = `<span class="status-indicator" style="background-color: ${getStatusColor(device.lastSeen)};"></span>${device.ipAddress}<br>${device.macAddress || 'N/A'}`;
+        row.querySelector('td:nth-child(2)').textContent = device.deviceName;
+        row.querySelector('td:nth-child(3)').textContent = device.os;
+        const notificationButton = row.querySelector('td:nth-child(4) button');
+        notificationButton.textContent = device.notificationsEnabled ? 'Enabled' : 'Disabled';
+        notificationButton.classList.toggle('btn-success', device.notificationsEnabled);
+        notificationButton.classList.toggle('btn-danger', !device.notificationsEnabled);
+    }
+}
+
+function toggleNotification(deviceId) {
+    console.log(`Toggling notifications for device ID: ${deviceId}`);
+    fetch(`/devices/toggle-notification/${deviceId}`, { method: 'POST' })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        }
-
-        function toggleNotification(deviceId) {
-            fetch(`/toggle-notification/${deviceId}`, {
-                method: 'POST'
-            })
-            .catch(error => console.error('Error toggling notification:', error));
-        }
+            return response.json();
+        })
+        .then(data => {
+            console.log(`Received updated device data:`, data);
+            const row = document.getElementById(`device-${deviceId}`);
+            if (row) {
+                const notificationButton = row.querySelector('td:nth-child(4) button');
+                notificationButton.textContent = data.notificationsEnabled ? 'Enabled' : 'Disabled';
+                notificationButton.classList.toggle('btn-success', data.notificationsEnabled);
+                notificationButton.classList.toggle('btn-danger', !data.notificationsEnabled);
+            }
+        })
+        .catch(error => {
+            console.error('Error toggling notification:', error);
+        });
+}
 
         function fetchDevices() {
             fetch('/devices')
