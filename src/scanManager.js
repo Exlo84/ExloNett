@@ -14,7 +14,7 @@ const startNmapScan = () => {
 
  console.log('Starting Nmap scan...');
  const nmapPath = '"C:\\Program Files (x86)\\Nmap\\nmap.exe"';
- const command = `${nmapPath} -oX output.xml 192.168.1.1/24`;
+ const command = `${nmapPath} -O -oX output.xml 192.168.1.1/24`;
 
  nmapProcess = exec(command, (error, stdout, stderr) => {
     if (error) {

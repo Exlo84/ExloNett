@@ -23,7 +23,7 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>IP Address & MAC</th>
+                    <th id="ipAddressHeader">IP Address & MAC</th>
                     <th>Device Name</th>
                     <th>OS</th>
                     <th>Notifications</th>
@@ -40,6 +40,41 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+    let sortOrder = 'ip'; // Default sort order
+
+function ipToInt(ip) {
+    return ip.split('.').reduce((int, oct) => {
+        return (int << 8) + parseInt(oct, 10);
+    }, 0);
+}
+
+document.getElementById('ipAddressHeader').addEventListener('click', function() {
+    // Toggle sort order
+    sortOrder = sortOrder === 'ip' ? 'newest' : 'ip';
+
+    // Fetch current devices
+    fetch('/devices')
+        .then(response => response.json())
+        .then(devices => {
+            // Sort devices based on the current sort order
+            let sortedDevices;
+            if (sortOrder === 'ip') {
+                sortedDevices = devices.sort((a, b) => ipToInt(a.ipAddress) - ipToInt(b.ipAddress));
+            } else {
+                // Assuming 'lastSeen' is a property that indicates when the device was last connected
+                sortedDevices = devices.sort((a, b) => new Date(b.lastSeen) - new Date(a.lastSeen));
+            }
+
+            // Clear the device table
+            const deviceTable = document.getElementById('deviceTable');
+            deviceTable.innerHTML = '';
+
+            // Re-add devices to the table in the new order
+            sortedDevices.forEach(device => addDeviceRow(device));
+        })
+        .catch(error => console.error('Failed to fetch devices:', error));
+});
+
         const socket = io();
 
         socket.on('deviceUpdated', device => {
