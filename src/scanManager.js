@@ -84,13 +84,20 @@ function updateDeviceOsInfo(parsedResult) {
         const os = host.os && host.os.osmatch && host.os.osmatch[0].$.name;
         
         // Extract the MAC address
-        const macAddress = host.address.find(address => address.$.addrtype === 'mac').$.addr;
+        const macAddressEntry = host.address.find(address => address.$.addrtype === 'mac');
+        const macAddress = macAddressEntry ? macAddressEntry.$.addr : 'N/A'; // Use 'N/A' if MAC address is not found
         
         // Extract the vendor as a fallback for the device name
-        const vendor = host.address.find(address => address.$.addrtype === 'mac').$.vendor;
+        const vendor = macAddressEntry ? macAddressEntry.$.vendor : 'Unknown'; // Use 'Unknown' if vendor is not found
         
-        // Use the vendor as the device name if the device name is not present
-        const deviceName = host.hostnames && host.hostnames.hostname && host.hostnames.hostname[0].$.name || vendor;
+        // Use the vendor as the device name if the device name is not present or is empty
+        let deviceName = '';
+        if (host.hostnames && host.hostnames.hostname && host.hostnames.hostname.length > 0) {
+            deviceName = host.hostnames.hostname[0].$.name;
+        }
+        if (!deviceName || deviceName.trim() === '') {
+            deviceName = vendor;
+        }
         
         // Update device in the database
         try {
