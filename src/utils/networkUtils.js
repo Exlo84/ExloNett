@@ -1,5 +1,5 @@
 const nmap = require('node-nmap');
-nmap.nmapLocation = "C:\\Program Files (x86)\\Nmap\\nmap.exe"; // Adjust as necessary
+nmap.nmapLocation = "C:\\Program Files (x86)\\Nmap\\nmap.exe"; // "/usr/bin/nmap" for Ubuntu
 
 exports.scanNetworkDevices = () => {
   return new Promise((resolve, reject) => {
